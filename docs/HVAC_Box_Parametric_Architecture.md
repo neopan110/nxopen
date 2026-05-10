@@ -540,7 +540,7 @@ enum class ParamStatus {
 |--------|----------|---------|---------|
 | NX 12.0 | V12.0.0 | NXOpen C++ / UF (legacy) | 基线兼容版本，UF为主 |
 | NX 1980 | V1980 (相当于NX15) | NXOpen C++ | 过渡版本，NXOpen为主+UF补充 |
-| NX 2206 | V2206 (相当于NX17) | NXOpen C++ (目标版本) | 全功能版本，充分利用新API |
+| NX 2306 | V2306 (相当于NX18) | NXOpen C++ (目标版本) | 全功能版本，充分利用新API |
 
 ### 5.2 版本兼容策略
 
@@ -550,7 +550,7 @@ enum class ParamStatus {
 #define HVAC_NX_VERSION_H
 
 // 编译时版本检测
-#if NX_VERSION_NUMBER >= 2206000
+#if NX_VERSION_NUMBER >= 2306000
     #define HVAC_USE_JOURNALIDENTIFIER 1
     #define HVAC_USE_MODERN_EXPRESSION 1
     #define HVAC_USE_NXOPEN_MOTION 1
@@ -569,7 +569,7 @@ enum class ParamStatus {
 
 ### 5.3 关键API版本兼容对照
 
-| 功能 | NX12 API | NX1980 API | NX2206 API |
+| 功能 | NX12 API | NX1980 API | NX2306 API |
 |------|----------|-----------|------------|
 | 创建表达式 | UF_MODL_create_exp() | NXOpen::ExpressionCollection::CreateExpression() | 同1980，增强错误信息 |
 | 创建拉伸体 | UF_MODL_create_extrusion() | NXOpen::Features::ExtrudeBuilder | 同1980 |
@@ -588,12 +588,12 @@ enum class ParamStatus {
 
 ```bash
 # Windows环境 (主开发环境)
-set UGII_BASE_DIR=C:\Siemens\NX2206
+set UGII_BASE_DIR=C:\Siemens\NX2306
 set UGII_ROOT_DIR=%UGII_BASE_DIR%\NXBIN
 set UGOPEN_DIR=%UGII_BASE_DIR%\UGOPEN
 
-# 编译器: Visual Studio 2019 (NX2206推荐) / VS2015 (NX12兼容)
-# 注意: NX2206严格要求VS2019 v16.x，不兼容VS2022
+# 编译器: Visual Studio 2019 (NX2306推荐) / VS2015 (NX12兼容)
+# 注意: NX2306严格要求VS2019 v16.x，不兼容VS2022
 ```
 
 #### 5.4.2 CMakeLists.txt 核心配置
@@ -602,7 +602,7 @@ set UGOPEN_DIR=%UGII_BASE_DIR%\UGOPEN
 cmake_minimum_required(VERSION 3.16)
 project(HvacBoxParametric VERSION 1.0.0 LANGUAGES CXX)
 
-# C++标准: NX2206支持C++17, NX12需要C++11
+# C++标准: NX2306支持C++17, NX12需要C++11
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -804,7 +804,7 @@ UF_free(bodyArray);  // 必须释放
 
 ```bash
 # 1. 配置NX环境
-source /opt/Siemens/NX2206/UGII/ugii_env.sh  # Linux
+source /opt/Siemens/NX2306/UGII/ugii_env.sh  # Linux
 # 或 Windows: 运行NX Command Prompt
 
 # 2. CMake配置
@@ -850,7 +850,7 @@ copy bin\hvac_box_parametric.dll %UGII_BASE_DIR%\application\
 | PIT-008 | Undo/Redo后对象指针失效 | UndoMark前后重新获取引用 |
 | PIT-009 | 大批量特征创建卡顿 | 包裹在UF_MODL_set_feature_edit_mode(DELAY) |
 | PIT-010 | Interpart Expression链接版本不兼容 | 使用Part Attribute + 重建而非直接Interpart Exp |
-| PIT-011 | VS2022编译NX2206插件运行崩溃 | 必须使用VS2019 v16.x，平台工具集v142 |
+| PIT-011 | VS2022编译NX2306插件运行崩溃 | 必须使用VS2019 v16.x，平台工具集v142 |
 | PIT-012 | Release/Debug混用NX库导致堆损坏 | 全程Release编译，Debug用日志代替 |
 
 ---
