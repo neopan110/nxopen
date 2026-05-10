@@ -1,0 +1,269 @@
+/**
+ * @file hvac_common.h
+ * @brief HVAC箱体参数化系统 - 全局公共定义
+ * @details 包含所有模块共用的类型定义、枚举、常量、前向声明。
+ *          本文件被所有模块头文件引用，修改时需谨慎评估影响范围。
+ * @version 1.0
+ * @date 2026-05-10
+ */
+
+#ifndef HVAC_COMMON_H
+#define HVAC_COMMON_H
+
+#include "hvac_nx_version.h"
+
+/* ============================================================
+ * NX Open 头文件引用
+ * ============================================================ */
+#if HVAC_USE_NXOPEN_CPP
+    #include <NXOpen/Session.hxx>
+    #include <NXOpen/Part.hxx>
+    #include <NXOpen/PartCollection.hxx>
+    #include <NXOpen/Body.hxx>
+    #include <NXOpen/Face.hxx>
+    #include <NXOpen/Edge.hxx>
+    #include <NXOpen/Point.hxx>
+    #include <NXOpen/Expression.hxx>
+    #include <NXOpen/ExpressionCollection.hxx>
+    #include <NXOpen/Features_Feature.hxx>
+    #include <NXOpen/Features_FeatureCollection.hxx>
+    #include <NXOpen/Features_ExtrudeBuilder.hxx>
+    #include <NXOpen/Features_RevolveBuilder.hxx>
+    #include <NXOpen/Features_BooleanBuilder.hxx>
+    #include <NXOpen/Features_OffsetSurfaceBuilder.hxx>
+    #include <NXOpen/NXException.hxx>
+    #include <NXOpen/NXObject.hxx>
+    #include <NXOpen/ListingWindow.hxx>
+#endif
+
+/* UF API 头文件 (全版本兼容) */
+#include <uf.h>
+#include <uf_defs.h>
+#include <uf_modl.h>
+#include <uf_part.h>
+#include <uf_obj.h>
+#include <uf_assem.h>
+#include <uf_attr.h>
+#include <uf_ui.h>
+
+/* C++ 标准库 */
+#include <string>
+#include <vector>
+#include <map>
+#include <memory>
+#include <functional>
+#include <cmath>
+#include <stdexcept>
+#include <sstream>
+#include <fstream>
+#include <algorithm>
+#include <array>
+
+/* ============================================================
+ * 全局常量
+ * ============================================================ */
+namespace HvacConst {
+
+    /** 数学常量 */
+    constexpr double PI = 3.14159265358979323846;
+    constexpr double DEG_TO_RAD = PI / 180.0;
+    constexpr double RAD_TO_DEG = 180.0 / PI;
+
+    /** 几何公差 */
+    constexpr double TOLERANCE_LINEAR = 0.001;      // 线性公差 0.001mm
+    constexpr double TOLERANCE_ANGULAR = 0.01;      // 角度公差 0.01deg
+    constexpr double TOLERANCE_DISTANCE = 0.01;     // 距离判断公差 0.01mm
+
+    /** 壳体设计约束 */
+    constexpr double MIN_WALL_THICKNESS = 2.0;      // 最小壁厚 mm
+    constexpr double MAX_WALL_THICKNESS = 3.5;      // 最大壁厚 mm
+    constexpr double MIN_DRAFT_ANGLE = 1.5;         // 最小拔模角 deg
+    constexpr double MIN_APPEARANCE_DRAFT = 3.0;    // 外观面最小拔模角 deg
+    constexpr double MIN_DOOR_CLEARANCE = 0.5;      // 风门最小间隙 mm
+    constexpr double SEAL_GROOVE_MIN_WIDTH = 3.0;   // 密封槽最小宽度 mm
+    constexpr double SEAL_GROOVE_MAX_WIDTH = 5.0;   // 密封槽最大宽度 mm
+    constexpr double SNAP_FIT_SPACING_MIN = 60.0;   // 卡扣最小间距 mm
+    constexpr double SNAP_FIT_SPACING_MAX = 100.0;  // 卡扣最大间距 mm
+
+    /** 运动机构约束 */
+    constexpr double TEMP_DOOR_SWEEP_MIN = 45.0;    // 温度风门最小摆角 deg
+    constexpr double TEMP_DOOR_SWEEP_MAX = 90.0;    // 温度风门最大摆角 deg
+    constexpr double LINKAGE_TRANSMISSION_ANGLE_MIN = 40.0; // 连杆最小传动角 deg
+    constexpr double ACTUATOR_SAFETY_FACTOR = 0.7;  // 执行器力矩安全系数
+
+    /** 材料属性 (PP+TD20) */
+    constexpr double MATERIAL_DENSITY = 1.04;       // 密度 g/cm³
+    constexpr double MATERIAL_SHRINKAGE = 0.005;    // 收缩率 0.5%
+    constexpr double MATERIAL_FLEXURAL_MODULUS = 2800.0; // 弯曲模量 MPa
+
+    /** 系统限制 */
+    constexpr int MAX_EXPRESSION_NAME_LEN = 64;     // Expression名称最大长度
+    constexpr int MAX_UNDO_MARKS = 10;              // 最大Undo标记数
+
+} // namespace HvacConst
+
+/* ============================================================
+ * 全局枚举定义
+ * ============================================================ */
+
+/** 风门类型 */
+enum class DoorType {
+    TEMP_DOOR,          // 温度风门
+    MODE_DOOR_DEF,      // 模式风门-除霜
+    MODE_DOOR_FACE,     // 模式风门-吹面
+    MODE_DOOR_FOOT,     // 模式风门-暖足
+    INTAKE_DOOR         // 内外循环风门
+};
+
+/** 出风口类型 */
+enum class OutletType {
+    DEF,    // 除霜 Defrost
+    FACE,   // 吹面 Face
+    FOOT,   // 暖足 Foot
+    REAR    // 后排 Rear (可选)
+};
+
+/** 壳体分型位置 */
+enum class ShellHalf {
+    UPPER,  // 上壳体
+    LOWER   // 下壳体
+};
+
+/** 左右驾定义 */
+enum class DriveSide {
+    LHD,    // 左舵 (Left Hand Drive)
+    RHD     // 右舵 (Right Hand Drive)
+};
+
+/** 参数状态 */
+enum class ParamStatus {
+    VALID,              // 参数在合理范围内
+    WARN_NEAR_LIMIT,    // 接近边界(90%~100%范围), 黄色警告
+    FAIL_OUT_RANGE,     // 超出硬限制, 拒绝赋值并回退
+    FAIL_CONFLICT       // 与其他参数冲突(几何不可实现)
+};
+
+/** 校验结果 */
+enum class ValidationResult {
+    PASS,   // 通过
+    WARN,   // 警告(可接受但需注意)
+    FAIL    // 失败(必须修正)
+};
+
+/** 模块构建状态 */
+enum class BuildStatus {
+    NOT_STARTED,    // 未开始
+    IN_PROGRESS,    // 构建中
+    SUCCESS,        // 成功完成
+    FAILED,         // 失败
+    ROLLED_BACK     // 已回滚
+};
+
+/** 参数层级 */
+enum class ParamLevel {
+    LEVEL_0,    // 整车输入参数 (外部约束, 不可修改)
+    LEVEL_1,    // 驱动参数 (设计师主动设定)
+    LEVEL_2,    // 关联参数 (自动计算)
+    LEVEL_3     // 校验参数 (验证用)
+};
+
+/* ============================================================
+ * 基础数据结构
+ * ============================================================ */
+
+/** 三维点/向量 */
+struct Vec3d {
+    double x = 0.0;
+    double y = 0.0;
+    double z = 0.0;
+
+    Vec3d() = default;
+    Vec3d(double _x, double _y, double _z) : x(_x), y(_y), z(_z) {}
+
+    Vec3d operator+(const Vec3d& rhs) const { return {x + rhs.x, y + rhs.y, z + rhs.z}; }
+    Vec3d operator-(const Vec3d& rhs) const { return {x - rhs.x, y - rhs.y, z - rhs.z}; }
+    Vec3d operator*(double s) const { return {x * s, y * s, z * s}; }
+    double length() const { return std::sqrt(x * x + y * y + z * z); }
+    double dot(const Vec3d& rhs) const { return x * rhs.x + y * rhs.y + z * rhs.z; }
+    Vec3d cross(const Vec3d& rhs) const {
+        return {y * rhs.z - z * rhs.y, z * rhs.x - x * rhs.z, x * rhs.y - y * rhs.x};
+    }
+    Vec3d normalized() const {
+        double len = length();
+        if (len < HvacConst::TOLERANCE_LINEAR) return {0, 0, 0};
+        return {x / len, y / len, z / len};
+    }
+};
+
+/** 参数范围定义 */
+struct ParamRange {
+    double minVal = 0.0;
+    double maxVal = 0.0;
+    double defaultVal = 0.0;
+    std::string unit;       // "mm", "deg", "kW" 等
+
+    bool isInRange(double val) const { return val >= minVal && val <= maxVal; }
+    bool isNearLimit(double val, double threshold = 0.9) const {
+        double range = maxVal - minVal;
+        double distToMin = val - minVal;
+        double distToMax = maxVal - val;
+        return (distToMin < range * (1.0 - threshold)) || (distToMax < range * (1.0 - threshold));
+    }
+};
+
+/** 校验条目 */
+struct ValidationItem {
+    std::string id;             // 如 "L3-001"
+    std::string description;    // 校验项描述
+    ValidationResult result = ValidationResult::PASS;
+    std::string message;        // 结果详情
+    double actualValue = 0.0;   // 实际测量值
+    double limitValue = 0.0;    // 限制值
+};
+
+/** 构建上下文 - 在模块间传递 */
+struct BuildContext {
+#if HVAC_USE_NXOPEN_CPP
+    NXOpen::Session* pSession = nullptr;
+    NXOpen::Part* pWorkPart = nullptr;
+#endif
+    tag_t workPartTag = NULL_TAG;
+    tag_t undoMarkId = NULL_TAG;
+    BuildStatus status = BuildStatus::NOT_STARTED;
+    std::vector<std::string> logMessages;
+};
+
+/* ============================================================
+ * 实用宏定义
+ * ============================================================ */
+
+/** 安全释放UF数组 */
+#define HVAC_UF_FREE(ptr) do { if ((ptr) != nullptr) { UF_free(ptr); (ptr) = nullptr; } } while(0)
+
+/** 检查UF返回码 */
+#define HVAC_CHECK_UF(rc, msg) \
+    do { \
+        int _rc = (rc); \
+        if (_rc != 0) { \
+            char _err_msg[256]; \
+            UF_get_fail_message(_rc, _err_msg); \
+            throw std::runtime_error(std::string(msg) + " UF Error: " + _err_msg); \
+        } \
+    } while(0)
+
+/** Expression名称合法性检查(仅允许 [a-zA-Z0-9_]) */
+inline bool isValidExpressionName(const std::string& name) {
+    if (name.empty() || name.length() > HvacConst::MAX_EXPRESSION_NAME_LEN) return false;
+    for (char c : name) {
+        if (!std::isalnum(static_cast<unsigned char>(c)) && c != '_') return false;
+    }
+    return true;
+}
+
+/** 角度转弧度 */
+inline double degToRad(double deg) { return deg * HvacConst::DEG_TO_RAD; }
+
+/** 弧度转角度 */
+inline double radToDeg(double rad) { return rad * HvacConst::RAD_TO_DEG; }
+
+#endif /* HVAC_COMMON_H */
