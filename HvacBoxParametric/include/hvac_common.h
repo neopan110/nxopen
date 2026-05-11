@@ -59,23 +59,13 @@
 #include <uf_attr.h>
 #include <uf_ui.h>
 
-/* ============================================================
- * 解除NX头文件宏污染
- * NX uf_defs.h 定义了 PI, TWOPI, TRUE, FALSE 等全局宏
- * 这些宏会破坏C++代码，必须在引入NX头文件后立即取消
- * ============================================================ */
-#ifdef PI
-    #undef PI
-#endif
-#ifdef TWOPI
-    #undef TWOPI
-#endif
-#ifdef TRUE
-    #undef TRUE
-#endif
-#ifdef FALSE
-    #undef FALSE
-#endif
+/* Undefine ALL NX global macros that pollute C++ code */
+#undef PI
+#undef TWOPI
+#undef RADEG
+#undef DEGRA
+#undef TRUE
+#undef FALSE
 
 /* ============================================================
  * 全局常量
