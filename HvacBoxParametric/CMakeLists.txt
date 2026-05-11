@@ -157,6 +157,7 @@ if(MSVC)
         /EHsc           # C++异常处理
         /MP             # 多核编译
         /Zc:__cplusplus # 正确报告__cplusplus宏
+        /utf-8          # 源文件和执行字符集均为UTF-8,消除C4819
     )
 
     # Release优化
