@@ -296,7 +296,7 @@ std::vector<std::array<double, 3>> ModeDiscStrategy::getSealContour() const
     // 盘面外圈密封(圆形)
     int points = 72;
     for (int i = 0; i < points; ++i) {
-        double angle = 2.0 * HvacConst::PI * i / points;
+        double angle = 2.0 * HvacConst::HVAC_PI * i / points;
         contour.push_back({
             m_params.discCenterX + m_params.discOuterRadius * std::cos(angle),
             m_params.discCenterY,
@@ -307,7 +307,7 @@ std::vector<std::array<double, 3>> ModeDiscStrategy::getSealContour() const
     // 内圈密封(如果是环形盘)
     if (m_params.discInnerRadius > 1.0) {
         for (int i = 0; i < points; ++i) {
-            double angle = 2.0 * HvacConst::PI * i / points;
+            double angle = 2.0 * HvacConst::HVAC_PI * i / points;
             contour.push_back({
                 m_params.discCenterX + m_params.discInnerRadius * std::cos(angle),
                 m_params.discCenterY,
@@ -343,8 +343,8 @@ double ModeDiscStrategy::calcTorque(AirMode fromMode, AirMode toMode) const
     double R_mean = (m_params.discOuterRadius + m_params.discInnerRadius) / 2.0;
 
     // 密封接触周长 = 外圈 + 内圈 + 窗口边缘
-    double outerCirc = 2.0 * HvacConst::PI * m_params.discOuterRadius;
-    double innerCirc = 2.0 * HvacConst::PI * m_params.discInnerRadius;
+    double outerCirc = 2.0 * HvacConst::HVAC_PI * m_params.discOuterRadius;
+    double innerCirc = 2.0 * HvacConst::HVAC_PI * m_params.discInnerRadius;
     double totalSealLength = outerCirc + innerCirc;
 
     double M_seal = mu * sealLinePressure * totalSealLength * R_mean * 0.001; // N·mm → N·m转回

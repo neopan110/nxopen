@@ -119,7 +119,7 @@ void HvacParameterSet::calcTempDoorGeometry()
     }
 
     // 有效弧长 = π × R × (θ/360)
-    m_level2.tempDoorArcLength = HvacConst::PI * m_level2.tempDoorRadius
+    m_level2.tempDoorArcLength = HvacConst::HVAC_PI * m_level2.tempDoorRadius
                                  * (m_level2.tempDoorSweepAngle / 360.0);
 
     // 风门轴长度 = 箱体内宽 - 2×轴承座宽(每侧8mm)

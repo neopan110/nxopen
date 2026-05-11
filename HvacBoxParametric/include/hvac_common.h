@@ -12,6 +12,19 @@
 
 #include "hvac_nx_version.h"
 
+/* C++ 标准库 (必须在NX头文件之前) */
+#include <string>
+#include <vector>
+#include <map>
+#include <memory>
+#include <functional>
+#include <cmath>
+#include <stdexcept>
+#include <sstream>
+#include <fstream>
+#include <algorithm>
+#include <array>
+
 /* ============================================================
  * NX Open 头文件引用
  * ============================================================ */
@@ -46,18 +59,23 @@
 #include <uf_attr.h>
 #include <uf_ui.h>
 
-/* C++ 标准库 */
-#include <string>
-#include <vector>
-#include <map>
-#include <memory>
-#include <functional>
-#include <cmath>
-#include <stdexcept>
-#include <sstream>
-#include <fstream>
-#include <algorithm>
-#include <array>
+/* ============================================================
+ * 解除NX头文件宏污染
+ * NX uf_defs.h 定义了 PI, TWOPI, TRUE, FALSE 等全局宏
+ * 这些宏会破坏C++代码，必须在引入NX头文件后立即取消
+ * ============================================================ */
+#ifdef PI
+    #undef PI
+#endif
+#ifdef TWOPI
+    #undef TWOPI
+#endif
+#ifdef TRUE
+    #undef TRUE
+#endif
+#ifdef FALSE
+    #undef FALSE
+#endif
 
 /* ============================================================
  * 全局常量
@@ -65,9 +83,9 @@
 namespace HvacConst {
 
     /** 数学常量 */
-    constexpr double PI = 3.14159265358979323846;
-    constexpr double DEG_TO_RAD = PI / 180.0;
-    constexpr double RAD_TO_DEG = 180.0 / PI;
+    constexpr double HVAC_PI = 3.14159265358979323846;
+    constexpr double DEG_TO_RAD = HVAC_PI / 180.0;
+    constexpr double RAD_TO_DEG = 180.0 / HVAC_PI;
 
     /** 几何公差 */
     constexpr double TOLERANCE_LINEAR = 0.001;      // 线性公差 0.001mm
