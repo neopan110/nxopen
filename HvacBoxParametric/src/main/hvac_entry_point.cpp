@@ -30,12 +30,6 @@
 #include "modules/shell_builder.h"
 #include "utils/error_handler.h"
 
-#include <uf.h>
-#include <uf_ui.h>
-#include <uf_part.h>
-#include <uf_modl.h>
-#include <uf_exit.h>
-
 /* ============================================================
  * 内部函数前向声明
  * ============================================================ */
